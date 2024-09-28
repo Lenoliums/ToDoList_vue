@@ -67,8 +67,6 @@ export default {
         <button @click="recording">recording task</button>
         </div>
     </div>
-  
-    <TheWelcome />
 </template>
 
 <style>
