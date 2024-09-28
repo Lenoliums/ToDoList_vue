@@ -1,5 +1,5 @@
 <script>
-import {ref, onMounted, watch} from 'vue'
+import {ref, onMounted} from 'vue'
 export default {
   setup(){
     const newTaskText = ref('')
@@ -11,14 +11,17 @@ export default {
           id: taskId,
           value: newTaskText.value
         })
+        localStorage.setItem(taskId, newTaskText.value);
         newTaskText.value='';
       }
     }
-    function DoneTask(e){
-      console.log(e.currentTarget)
+    function doneTask(e){
+      if(e.target.type !== 'checkbox'){
+        return
+      }
       if(e.currentTarget.classList.contains('done')){
         e.currentTarget.classList.remove('done');
-        localStorage.setItem(e.currentTarget.id, e.currentTarget.getElementsByTagName('label')[0].innerHTML);
+        localStorage.setItem(e.currentTarget.id, e.currentTarget.getElementsByTagName('input')[1].value);
       }
       else{
         e.currentTarget.classList.add('done');
@@ -26,18 +29,17 @@ export default {
 
       }
     }
-
-    watch(doList.value, ()=>{
-      let newTask = doList.value[doList.value.length-1]
-      localStorage.setItem(newTask.id, newTask.value);
-    })
+    function editTask(task, newVal){
+      task.value = newVal; 
+      localStorage[task.id]=newVal;
+    }
     
     onMounted(()=>{
       if(typeof(Storage)!==undefined){
         for(let key in localStorage) {
             if (!localStorage.hasOwnProperty(key))
               continue; 
-              doList.value.push({id: key, value: localStorage.getItem(key)});
+            doList.value.push({id: key, value: localStorage.getItem(key)});
         }
       }
     })
@@ -46,7 +48,8 @@ export default {
       doList,
       recording,
       newTaskText,
-      DoneTask
+      doneTask,
+      editTask
     }
     
   }
@@ -57,14 +60,14 @@ export default {
     <h1>ToDo List</h1>
     <div id="bigCont">
         <form onclick="event.stopPropagation()">
-          <div @click="DoneTask" v-for="task in doList" class="task_cont" v-bind:id="task.id">
+          <div @click="doneTask" v-for="task in doList" class="task_cont" v-bind:id="task.id">
             <input type="checkbox">
-            <label>{{ task.value }}</label>
+            <input type="text" v-bind:value="task.value" @change="(e)=>editTask(task, e.target.value)" >
           </div>
         </form>
         <div id="smalCont">
-        <input type="text" name="ToDo" placeholder="what to do" v-model="newTaskText">
-        <button @click="recording">recording task</button>
+          <input type="text" name="ToDo" placeholder="what to do" v-model="newTaskText">
+          <button @click="recording">recording task</button>
         </div>
     </div>
 </template>
@@ -86,19 +89,18 @@ body{background-image: url(https://gas-kvas.com/uploads/posts/2023-02/1675459062
     text-align: center;
   }
 .task_cont{
+    display: flex;
     text-align: left;
     border-bottom: 1px solid rgb(209, 209, 209);
     margin: 10px 20px 0 20px;
+    padding: 0 5px;
 }
 
-label{
-    margin-left:20px;
-}
 input[type="checkbox"]{
     margin: 3px 3px 3px 4px;
 }
 
-input[type="text"]{
+#smalCont input[type="text"]{
     text-decoration: none;
     width: 60%;
     margin: 15px;
@@ -106,7 +108,7 @@ input[type="text"]{
 button{
   margin: 15px;
 }
-input,button{cursor: pointer;}
+#smalCont input,button{cursor: pointer;}
 #smalCont{
     text-align: center;
 }
@@ -123,7 +125,7 @@ input,button{cursor: pointer;}
     #bigCont {
       width: 80%;
     }
-    input[type="text"]{
+    #smalCont input[type="text"]{
         width: 80%;
         margin: 15px;
     }
@@ -133,7 +135,13 @@ input,button{cursor: pointer;}
   background-color: rgb(240, 240, 240);
   border-radius: 40px;
 }
-.done label{
+.task_cont input[type="text"]{
+  margin-left:20px;
+  border: 0;
+  background-color: rgba(0,0,0,0);
+  flex: 1;
+}
+.done input[type="text"]{
   text-decoration: line-through;
 }
 
