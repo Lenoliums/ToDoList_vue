@@ -61,12 +61,12 @@ export default {
     <div id="bigCont">
         <form onclick="event.stopPropagation()">
           <div @click="doneTask" v-for="task in doList" class="task_cont" v-bind:id="task.id">
-            <input type="checkbox">
-            <input type="text" v-bind:value="task.value" @change="(e)=>editTask(task, e.target.value)" >
+            <input type="checkbox"/>
+            <input type="text" v-bind:value="task.value" @change="(e)=>editTask(task, e.target.value)"/>
           </div>
         </form>
         <div id="smalCont">
-          <input type="text" name="ToDo" placeholder="what to do" v-model="newTaskText">
+          <input type="text" name="ToDo" placeholder="what to do" v-model="newTaskText"/>
           <button @click="recording">recording task</button>
         </div>
     </div>
