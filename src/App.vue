@@ -120,6 +120,7 @@ button{
     border: 2px solid black;
     background: white;
     min-width: 107px;
+    overflow: hidden;
 }
 @media screen and (max-width: 1030px) {
     #bigCont {
