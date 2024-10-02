@@ -1,12 +1,16 @@
-<script>
+<script lang="ts">
 import {ref, onMounted} from 'vue'
+interface Task{
+  id: string,
+  value: string
+}
 export default {
   setup(){
-    const newTaskText = ref('')
-    const doList = ref([]);
-    function recording(){
+    const newTaskText = ref<string>('')
+    const doList = ref<Array<Task>>([]);
+    function recording(): void{
       if(newTaskText){
-        let taskId=crypto.randomUUID();
+        let taskId: string=crypto.randomUUID();
         doList.value.push({
           id: taskId,
           value: newTaskText.value
@@ -15,23 +19,23 @@ export default {
         newTaskText.value='';
       }
     }
-    function doneTask(e){
-      if(e.target.type !== 'checkbox'){
+    function doneTask(e: MouseEvent): void{
+      if((e.target as HTMLInputElement).type !== 'checkbox'){
         return
       }
-      if(e.currentTarget.classList.contains('done')){
-        e.currentTarget.classList.remove('done');
-        localStorage.setItem(e.currentTarget.id, e.currentTarget.getElementsByTagName('input')[1].value);
+      let currentTarget = e.currentTarget as HTMLElement
+      if(currentTarget.classList.contains('done')){
+        currentTarget.classList.remove('done');
+        localStorage.setItem(currentTarget.id, currentTarget.getElementsByTagName('input')[1].value);
       }
       else{
-        e.currentTarget.classList.add('done');
-        localStorage.removeItem(e.currentTarget.id);
-
+        currentTarget.classList.add('done');
+        localStorage.removeItem(currentTarget.id);
       }
     }
-    function editTask(task, newVal){
-      task.value = newVal; 
-      localStorage[task.id]=newVal;
+    function editTask(task: Task, targetElement: EventTarget): void{
+      task.value = (targetElement as HTMLInputElement).value; 
+      localStorage[task.id]=(targetElement as HTMLInputElement).value;
     }
     
     onMounted(()=>{
@@ -39,7 +43,7 @@ export default {
         for(let key in localStorage) {
             if (!localStorage.hasOwnProperty(key))
               continue; 
-            doList.value.push({id: key, value: localStorage.getItem(key)});
+            doList.value.push({id: key, value: localStorage.getItem(key) ?? ''});
         }
       }
     })
@@ -62,7 +66,7 @@ export default {
         <form onclick="event.stopPropagation()">
           <div @click="doneTask" v-for="task in doList" class="task_cont" v-bind:id="task.id">
             <input type="checkbox"/>
-            <input type="text" v-bind:value="task.value" @change="(e)=>editTask(task, e.target.value)"/>
+            <input type="text" v-bind:value="task.value" @change="(e)=>editTask(task, e.target)"/>
           </div>
         </form>
         <div id="smalCont">
